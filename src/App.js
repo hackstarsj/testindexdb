@@ -1,23 +1,46 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import { saveImage, getImages } from './db';
 
 function App() {
+  const [images, setImages] = useState([]);
+
+  const handleFileChange = async (e) => {
+    const files = e.target.files;
+    for (let file of files) {
+      if (file.type.startsWith('image/')) {
+        await saveImage(file);
+      }
+    }
+    loadImages();
+  };
+
+  const loadImages = async () => {
+    const imgs = await getImages();
+    setImages(imgs);
+  };
+
+  useEffect(() => {
+    loadImages();
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div style={{ padding: 20 }}>
+      <h1>Offline Image PWA</h1>
+      <input type="file" multiple accept="image/*" onChange={handleFileChange} />
+      <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: 20 }}>
+        {images.map((img, idx) => {
+          const url = URL.createObjectURL(img.blob);
+          return (
+            <img
+              key={idx}
+              src={url}
+              alt="offline"
+              style={{ height: 100, margin: 10 }}
+              onLoad={() => URL.revokeObjectURL(url)}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }
