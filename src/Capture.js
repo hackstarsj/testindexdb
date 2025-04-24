@@ -51,7 +51,10 @@ function Capture() {
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       canvas.toBlob(async (blob) => {
         if (blob && blob.size > 0) {
-          await saveImage(blob);
+          let fileName = `photo-${Date.now()}.jpg`;
+          let mimeType = blob.type || 'image/jpeg';
+          let file= new File([blob],fileName, { type: mimeType });
+          await saveImage(file);
           loadImages();
         } else {
           alert('Captured blob is empty.');
